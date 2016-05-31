@@ -20,13 +20,13 @@ class SentenceTypeError(ValueError):
 
 class NMEASentenceType(type):
     sentence_types = {}
-    def __init__(cls, name, bases, dict):
-        type.__init__(cls, name, bases, dict)
+    def __init__(cls, name, bases, dct):
+        type.__init__(cls, name, bases, dct)
         base = bases[0]
         if base is object:
             return
         base.sentence_types[name] = cls
-        cls.name_to_idx = {f[1]:i for i, f in enumerate(cls.fields)}
+        cls.name_to_idx = dict((f[1], i) for i, f in enumerate(cls.fields))
 
 
 # http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
@@ -45,7 +45,7 @@ class NMEASentence(NMEASentenceBase):
     >>> print(s)
     '''
 
-    sentence_re = re.compile('''
+    sentence_re = re.compile(r'''
         # start of string, optional whitespace, optional '$'
         ^\s*\$?
 
@@ -73,15 +73,15 @@ class NMEASentence(NMEASentenceBase):
         (?:[*](?P<checksum>[A-F0-9]{2}))?
 
         # optional trailing whitespace
-        \s*[\\\r\\\n]*$
+        \s*[\r\n]*$
         ''', re.X | re.IGNORECASE)
 
     talker_re = \
-        re.compile('^(?P<talker>\w{2})(?P<sentence>\w{3}),$')
+        re.compile(r'^(?P<talker>\w{2})(?P<sentence>\w{3}),$')
     query_re = \
-        re.compile('^(?P<talker>\w{2})(?P<listener>\w{2})Q,(?P<sentence>\w{3})$')
+        re.compile(r'^(?P<talker>\w{2})(?P<listener>\w{2})Q,(?P<sentence>\w{3})$')
     proprietary_re = \
-        re.compile('^P(?P<manufacturer>\w{3})$')
+        re.compile(r'^P(?P<manufacturer>\w{3})$')
 
     name_to_idx = {}
     fields = ()
@@ -91,9 +91,9 @@ class NMEASentence(NMEASentenceBase):
         return reduce(operator.xor, map(ord, nmea_str), 0)
 
     @staticmethod
-    def parse(input):
+    def parse(line):
         '''
-        parse(input)
+        parse(line)
 
         Parses a string representing a NMEA 0183 sentence, and returns a
         NMEASentence object
@@ -101,10 +101,11 @@ class NMEASentence(NMEASentenceBase):
         Raises ValueError if the string could not be parsed, or if the checksum
         did not match.
         '''
-        match = NMEASentence.sentence_re.match(input)
+        match = NMEASentence.sentence_re.match(line)
         if not match:
-            raise ParseError('could not parse data: %r' % input)
+            raise ParseError('could not parse data: %r' % line)
 
+        # pylint: disable=bad-whitespace
         nmea_str        = match.group('nmea_str')
         data_str        = match.group('data')
         checksum        = match.group('checksum')
@@ -115,8 +116,8 @@ class NMEASentence(NMEASentenceBase):
             cs1 = int(checksum, 16)
             cs2 = NMEASentence.checksum(nmea_str)
             if cs1 != cs2:
-                raise ChecksumError('checksum does not match: %02X != %02X' %
-                    (cs1, cs2))
+                raise ChecksumError(
+                    'checksum does not match: %02X != %02X' % (cs1, cs2))
 
         talker_match = NMEASentence.talker_re.match(sentence_type)
         if talker_match:
@@ -145,10 +146,12 @@ class NMEASentence(NMEASentenceBase):
         raise ParseError('could not parse sentence type: %r' % sentence_type)
 
     def __getattr__(self, name):
+        #pylint: disable=invalid-name
         t = type(self)
         try:
             i = t.name_to_idx[name]
-        except KeyError: raise AttributeError(name)
+        except KeyError:
+            raise AttributeError(name)
         f = t.fields[i]
         if i < len(self.data):
             v = self.data[i]
@@ -162,6 +165,7 @@ class NMEASentence(NMEASentenceBase):
             return v
 
     def __setattr__(self, name, value):
+        #pylint: disable=invalid-name
         t = type(self)
         if name not in t.name_to_idx:
             return object.__setattr__(self, name, value)
@@ -170,6 +174,7 @@ class NMEASentence(NMEASentenceBase):
         self.data[i] = str(value)
 
     def __repr__(self):
+        #pylint: disable=invalid-name
         r = []
         d = []
         t = type(self)
@@ -187,7 +192,7 @@ class NMEASentence(NMEASentenceBase):
         )
 
     def identifier(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def render(self, checksum=True, dollar=True, newline=False):
         res = self.identifier() + ','.join(self.data)
@@ -213,7 +218,6 @@ class TalkerSentence(NMEASentence):
 
     def identifier(self):
         return '%s%s,' % (self.talker, self.sentence_type)
-
 
 class QuerySentence(NMEASentence):
     sentence_types = {}

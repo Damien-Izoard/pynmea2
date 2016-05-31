@@ -23,7 +23,7 @@ def test_GGA():
     # Longitude Direction
     assert msg.lon_dir          == 'E'
     # GPS Quality Indicator
-    assert msg.gps_qual         == '1'
+    assert msg.gps_qual         == 1
     # Number of Satellites in use
     assert msg.num_sats         == '04'
     # Horizontal Dilution of Precision
@@ -40,6 +40,7 @@ def test_GGA():
     assert msg.age_gps_data     == ''
     # Differential Reference Station ID
     assert msg.ref_station_id   == '0000'
+    assert msg.is_valid == True
 
     msg.altitude = 200.0
     assert str(msg) == "$GPGGA,184353.07,1929.045,S,02410.506,E,1,04,2.6,200.0,M,-33.9,M,,0000*5E"
@@ -57,7 +58,7 @@ def test_RTE():
         "PBRCPK", "PBRTO", "PTELGR", "PPLAND", "PYAMBU",
         "PPFAIR", "PWARRN", "PMORTL", "PLISMR"]
 
-    msg.waypoint_list = ['ABC','DEF']
+    msg.waypoint_list = ['ABC', 'DEF']
     assert str(msg) == "$GPRTE,2,1,c,0,ABC,DEF*03"
 
 def test_R00():
@@ -65,9 +66,9 @@ def test_R00():
     msg = pynmea2.parse(data)
     assert msg.talker == 'GP'
     assert msg.sentence_type == 'R00'
-    assert msg.waypoint_list == ['A','B','C']
+    assert msg.waypoint_list == ['A', 'B', 'C']
 
-    msg.waypoint_list = ['ABC','DEF']
+    msg.waypoint_list = ['ABC', 'DEF']
     assert str(msg) == "$GPR00,ABC,DEF*42"
 
 def test_MWV():
@@ -118,6 +119,7 @@ def test_RMC():
     assert msg.latitude == 49.274166666666666
     assert msg.longitude == -123.18533333333333
     assert msg.datetime == datetime.datetime(1994, 11, 19, 22, 54, 46)
+    assert msg.is_valid == True
     assert msg.render() == data
 
 
@@ -140,3 +142,69 @@ def test_ZDA():
     assert msg.local_zone_minutes == 30
     assert msg.datestamp == datetime.date(2008, 7, 6)
     assert msg.datetime == datetime.datetime(2008, 7, 6, 1, 2, 3, 50000, msg.tzinfo)
+
+def test_VPW():
+    data = "$XXVPW,1.2,N,3.4,M"
+    msg = pynmea2.parse(data)
+    assert isinstance(msg, pynmea2.VPW)
+    assert msg.talker == 'XX'
+    assert msg.speed_kn == 1.2
+    assert msg.unit_knots == 'N'
+    assert msg.speed_ms == 3.4
+    assert msg.unit_ms == 'M'
+
+def test_BOD():
+    data = "XXBOD,045.,T,023.,M,DEST,START"
+    msg = pynmea2.parse(data)
+    assert isinstance(msg, pynmea2.BOD)
+    assert msg.talker == 'XX'
+
+
+def test_XDR():
+    data = "$YXXDR,A,-64.437,M,N,A,054.454,D,E,C,17.09,C,T-N1052*46"
+    msg = pynmea2.parse(data)
+    assert isinstance(msg, pynmea2.XDR)
+    assert msg.talker == 'YX'
+    assert msg.type == 'A'
+    assert msg.value == '-64.437'
+    assert msg.units == 'M'
+    assert msg.id == 'N'
+
+    assert msg.num_transducers == 3
+
+    t0 = msg.get_transducer(0)
+    assert t0.type == 'A'
+    assert t0.value == '-64.437'
+    assert t0.units == 'M'
+    assert t0.id == 'N'
+
+    t1 = msg.get_transducer(1)
+    assert t1.type == 'A'
+    assert t1.value == '054.454'
+    assert t1.units == 'D'
+    assert t1.id == 'E'
+
+    t2 = msg.get_transducer(2)
+    assert t2.type == 'C'
+    assert t2.value == '17.09'
+    assert t2.units == 'C'
+    assert t2.id == 'T-N1052'
+
+def test_GLL():
+    data = "$GPGLL,4916.45,N,12311.12,W,225444,A,*1D"
+    msg = pynmea2.parse(data)
+    assert msg.is_valid == True
+    assert msg.render() == data
+
+def test_GSA():
+    data = "$GPGSA,A,3,02,,,07,,09,24,26,,,,,1.6,1.6,1.0*3D"
+    msg = pynmea2.parse(data)
+    assert msg.is_valid == True
+    assert msg.render() == data
+
+def test_VBW():
+    data = "XXVBW,1.2,3.4,A,5.6,7.8,A"
+    msg = pynmea2.parse(data)
+    assert msg.is_valid == True
+    assert msg.render(checksum=False, dollar=False) == data
+

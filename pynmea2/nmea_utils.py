@@ -1,12 +1,13 @@
+#pylint: disable=invalid-name
 import datetime
-import math
 
 def timestamp(s):
     '''
     Converts a timestamp given in "hhmmss[.ss]" ASCII format to a
     datetime.time object
     '''
-    ms = (len(s) == 9) and 10000 * int(s[7:9]) or 0
+    ms_s = s[6:]
+    ms = ms_s and int(float(ms_s) * 1000000) or 0
 
     t = datetime.time(
         hour=int(s[0:2]),
@@ -34,7 +35,7 @@ def dm_to_sd(dm):
     # '12319.943281'
     if not dm or dm == '0':
         return 0.
-    d, m = re.match('^(\d+)(\d\d\.\d+)$', dm).groups()
+    d, m = re.match(r'^(\d+)(\d\d\.\d+)$', dm).groups()
     return float(d) + float(m) / 60
 
 
@@ -42,7 +43,7 @@ class LatLonFix(object):
     '''Mixin to add `lattitude` and `longitude` properties as signed decimals
     to NMEA sentences which have coordiantes given as degrees/minutes (lat, lon)
     and cardinal directions (lat_dir, lon_dir)'''
-
+    #pylint: disable=no-member
     @property
     def latitude(self):
         '''Lattitude in signed degrees (python float)'''
@@ -91,9 +92,38 @@ class LatLonFix(object):
 
 
 class DatetimeFix(object):
+    #pylint: disable=no-member
     @property
     def datetime(self):
         return datetime.datetime.combine(self.datestamp, self.timestamp)
+
+
+class ValidStatusFix(object):
+    #pylint: disable=no-member
+    @property
+    def is_valid(self):
+        return self.status == 'A'
+
+
+class ValidGSAFix(object):
+    #pylint: disable=no-member
+    @property
+    def is_valid(self):
+        return int(self.mode_fix_type) in [2, 3]
+
+
+class ValidGGAFix(object):
+    #pylint: disable=no-member
+    @property
+    def is_valid(self):
+        return self.gps_qual in range(1,6)
+
+
+class ValidVBWFix(object):
+    #pylint: disable=no-member
+    @property
+    def is_valid(self):
+        return self.data_validity_water_spd == self.data_validity_grnd_spd == 'A'
 
 
 class TZInfo(datetime.tzinfo):
@@ -101,6 +131,12 @@ class TZInfo(datetime.tzinfo):
         self.hh = hh
         self.mm = mm
         super(TZInfo, self).__init__()
+
+    def tzname(self, dt):
+        return ''
+
+    def dst(self, dt):
+        return datetime.timedelta(0)
 
     def utcoffset(self, dt):
         return datetime.timedelta(hours=self.hh, minutes=self.mm)

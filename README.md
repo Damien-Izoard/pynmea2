@@ -14,6 +14,7 @@ The `pynmea2` homepage is located at http://github.com/Knio/pynmea2
 
 [![Build Status](https://travis-ci.org/Knio/pynmea2.png?branch=master)](https://travis-ci.org/Knio/pynmea2)
 [![Coverage Status](https://coveralls.io/repos/Knio/pynmea2/badge.png?branch=master)](https://coveralls.io/r/Knio/pynmea2?branch=master)
+[![Code Health](https://landscape.io/github/Knio/pynmea2/master/landscape.svg?style=flat)](https://landscape.io/github/Knio/pynmea2/master)
 
 ### Installation
 
@@ -90,7 +91,7 @@ Generating
 
 You can create a `NMEASentence` object by calling the constructor with talker, message type, and data fields:
 
-    >>> msg = pynmea2.GGA('GP', 'GGA', '184353.07', '1929.045', 'S', '02410.506', 'E', '1', '04', '2.6', '100.00', 'M', '-33.9', 'M', '', '0000')
+    >>> msg = pynmea2.GGA('GP', 'GGA', ('184353.07', '1929.045', 'S', '02410.506', 'E', '1', '04', '2.6', '100.00', 'M', '-33.9', 'M', '', '0000'))
 
 
 and generate a NMEA string from a `NMEASentence` object:

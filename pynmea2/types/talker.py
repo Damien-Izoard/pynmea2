@@ -1,7 +1,14 @@
+# pylint: disable=wildcard-import,unused-wildcard-import
 from ..nmea import TalkerSentence
 from ..nmea_utils import *
+
+from collections import namedtuple
 from decimal import Decimal
 
+
+#pylint: disable=missing-docstring
+#pylint: disable=no-init
+#pylint: disable=too-few-public-methods
 class AAM(TalkerSentence):
     """ Waypoint Arrival Alarm
     """
@@ -10,7 +17,7 @@ class AAM(TalkerSentence):
         ("Perpendicular Passed", "perp_passed"),
         ("Circle Radius", "circle_rad"),
         ("Nautical Miles", "circle_rad_unit"),
-        ("Waypoint ID", "waypoint_id")
+        ("Waypoint ID", "waypoint_id"),
     )
 
 class ALM(TalkerSentence):
@@ -31,7 +38,7 @@ class ALM(TalkerSentence):
         ("Longitude of ascension node", "lat_asc_node"),
         ("Mean anomaly", "mean_anom"),
         ("F0 Clock parameter", "f0_clock_param"),
-        ("F1 Clock parameter", "f1_clock_param")
+        ("F1 Clock parameter", "f1_clock_param"),
     )
 
 
@@ -49,7 +56,7 @@ class APA(TalkerSentence):
         ("Perpendicular passed at waypoint", "perp_passed"), # A = True
         ("Bearing origin to destination", "bearing_to_dest"),
         ("Bearing type", "bearing_type"), # M = Magnetic, T = True
-        ("Destination waypoint ID", "dest_waypoint_id")
+        ("Destination waypoint ID", "dest_waypoint_id"),
     )
 
 
@@ -71,7 +78,7 @@ class APB(TalkerSentence):
         ("Bearing, present position to dest", "bearing_pres_dest"),
         ("Bearing to destination, type", "bearing_pres_dest_type"), # M = Magnetic, T = True
         ("Heading to steer to destination", "heading_to_dest"),
-        ("Heading to steer to destination type", "heading_to_dest_type")
+        ("Heading to steer to destination type", "heading_to_dest_type"),
     ) # M = Magnetic, T = True
 
 
@@ -91,37 +98,21 @@ class BEC(TalkerSentence):
         ("Nautical Miles", "nautical_miles"),
         ("Nautical Miles symbol", "nautical_miles_sym"),
         ("Waypoint ID", "waypoint_id"),
-        ("FAA mode indicator", "faa_mode")
+        ("FAA mode indicator", "faa_mode"),
     )
 
 
 class BOD(TalkerSentence):
-    # 045.
-    # ,T,023.,M,DEST,START
+    # 045.,T,023.,M,DEST,START
     fields = (
         ('Bearing True', 'bearing_t', Decimal),
         ('Bearing True Type', 'bearing_t_type'),
         ('Bearing Magnetic', 'bearing_mag', Decimal),
         ('Bearing Magnetic Type', 'bearing_mag_type'),
         ('Destination', 'dest'),
-        ('Start', 'start')
+        ('Start', 'start'),
     )
 
-    @property
-    def bearing_true(self):
-        return ','.join([self.bearing_t, self.bearing_t_type])
-
-    @property
-    def bearing_magnetic(self):
-        return ','.join([self.bearing_mag, self.bearing_mag_type])
-
-    @property
-    def destination(self):
-        return self.dest
-
-    @property
-    def origin(self):
-        return self.start
 
 class BWC(TalkerSentence):
     fields = (
@@ -136,7 +127,7 @@ class BWC(TalkerSentence):
         ('Magnetic Symbol', 'mag_sym'),
         ('Range to waypoint', 'range_next'),
         ('Unit of range', 'range_unit'),
-        ('Waypoint Name', 'waypoint_name')
+        ('Waypoint Name', 'waypoint_name'),
     )
 
 class BWR(TalkerSentence):
@@ -152,17 +143,17 @@ class BWR(TalkerSentence):
         ('Magnetic Symbol', 'mag_sym'),
         ('Range to waypoint', 'range_next'),
         ('Unit of range', 'range_unit'),
-        ('Waypoint Name', 'waypoint_name')
+        ('Waypoint Name', 'waypoint_name'),
     )
 
-class GGA(TalkerSentence, LatLonFix):
+class GGA(TalkerSentence, ValidGGAFix, LatLonFix):
     fields = (
         ('Timestamp', 'timestamp', timestamp),
         ('Latitude', 'lat'),
         ('Latitude Direction', 'lat_dir'),
         ('Longitude', 'lon'),
         ('Longitude Direction', 'lon_dir'),
-        ('GPS Quality Indicator', 'gps_qual'),
+        ('GPS Quality Indicator', 'gps_qual', int),
         ('Number of Satellites in use', 'num_sats'),
         ('Horizontal Dilution of Precision', 'horizontal_dil'),
         ('Antenna Alt above sea level (mean)', 'altitude', float),
@@ -170,7 +161,7 @@ class GGA(TalkerSentence, LatLonFix):
         ('Geoidal Separation', 'geo_sep'),
         ('Units of Geoidal Separation (meters)', 'geo_sep_units'),
         ('Age of Differential GPS Data (secs)', 'age_gps_data'),
-        ('Differential Reference Station ID', 'ref_station_id')
+        ('Differential Reference Station ID', 'ref_station_id'),
     )
 
 class GNS(TalkerSentence, LatLonFix):
@@ -180,13 +171,13 @@ class GNS(TalkerSentence, LatLonFix):
         ('Latitude Direction', 'lat_dir'),
         ('Longitude', 'lon'),
         ('Longitude Direction', 'lon_dir'),
-        ('Mode indicator', 'mode_inticator'),
+        ('Mode indicator', 'mode_indicator'),
         ('Total number of satelites in use', 'num_sats'),
         ('HDROP', 'hdop'),
         ('Antenna altitude, meters', 'altitude'),
         ('Goeidal separation meters', 'geo_sep'),
         ('Age of diferential data', 'age_gps_data'),
-        ('Differential reference station ID', 'diferential')
+        ('Differential reference station ID', 'diferential'),
     )
 
 class BWW(TalkerSentence):
@@ -198,21 +189,21 @@ class BWW(TalkerSentence):
         ("Bearing degrees Magnitude", "bearing_deg_mag"),
         ("Bearing degrees Magnitude Symbol", "bearing_deg_mag_sym"),
         ("Destination Waypoint ID", "waypoint_id_dest"),
-        ("Origin Waypoint ID", "waypoint_id_orig")
+        ("Origin Waypoint ID", "waypoint_id_orig"),
     )
 
-class GLL(TalkerSentence, LatLonFix):
+class GLL(TalkerSentence, ValidStatusFix, LatLonFix):
     fields = (
         ('Latitude', 'lat'),
         ('Latitude Direction', 'lat_dir'),
         ('Longitude', 'lon'),
         ('Longitude Direction', 'lon_dir'),
         ('Timestamp', 'timestamp', timestamp),
-        ('Data Validity', "data_valid"),
-        ("FAA mode indicator", "faa_mode")
+        ('Status', 'status'), # contains the 'A' or 'V' flag
+        ("FAA mode indicator", "faa_mode"),
     )
 
-class GSA(TalkerSentence):
+class GSA(TalkerSentence, ValidGSAFix):
     fields = (
         ('Mode', 'mode'),
         ('Mode fix type', 'mode_fix_type'),
@@ -230,8 +221,8 @@ class GSA(TalkerSentence):
         ('SV ID12', 'sv_id12'),
         ('PDOP (Dilution of precision)', 'pdop'),
         ('HDOP (Horizontal DOP)', 'hdop'),
-        ('VDOP (Vertical DOP)', 'vdop')
-            )
+        ('VDOP (Vertical DOP)', 'vdop'),
+    )
 
 
 class GST(TalkerSentence):
@@ -267,27 +258,34 @@ class GSV(TalkerSentence):
         ('SV PRN number 4', 'sv_prn_num_4'),
         ('Elevation in degrees 4', 'elevation_deg_4'), # 90 max
         ('Azimuth, deg from true north 4', 'azimuth_4'), # 000 to 159
-        ('SNR 4', 'snr_4')
+        ('SNR 4', 'snr_4'),
     )  # 00-99 dB
 
 
 class HDG(TalkerSentence):
-    """ NOTE! This is a GUESS as I cannot find an actual spec
-        telling me the fields. Updates are welcome!
+    """ NMEA 0183 standard Heading, Deviation and Variation
+        Format: $HCHDG,<1>,<2>,<3>,<4>,<5>*hh<CR><LF>
+    <1> Magnetic sensor heading, degrees, to the nearest 0.1 degree.
+    <2> Magnetic deviation, degrees east or west, to the nearest 0.1 degree.
+    <3> E if field <2> is degrees East
+        W if field <2> is degrees West
+    <4> Magnetic variation, degrees east or west, to the nearest 0.1 degree.
+    <5> E if field <4> is degrees East
+        W if field <4> is degrees West
     """
     fields = (
         ("Heading", "heading", Decimal),
         ("Deviation", "deviation", Decimal),
         ("Deviation Direction", "dev_dir"),
         ("Variation", "variation", Decimal),
-        ("Variation Direction", "var_dir")
+        ("Variation Direction", "var_dir"),
     )
 
 
 class HDT(TalkerSentence):
     fields = (
         ("Heading", "heading", Decimal),
-        ("True", "hdg_true")
+        ("True", "hdg_true"),
     )
 
 
@@ -303,14 +301,14 @@ class RMA(TalkerSentence):
         ("Speed over ground", "spd_over_grnd"), # Knots
         ("Course over ground", "crse_over_grnd"),
         ("Variation", "variation"),
-        ("Variation Direction", "var_dir")
+        ("Variation Direction", "var_dir"),
     )
 
-class RMB(TalkerSentence):
+class RMB(TalkerSentence, ValidStatusFix):
     """ Recommended Minimum Navigation Information
     """
     fields = (
-        ("Data Validity", "validity"),
+        ('Status', 'status'), # contains the 'A' or 'V' flag
         ("Cross Track Error", "cross_track_error"), # nautical miles, 9.9 max
         ("Cross Track Error, direction to corrent", "cte_correction_dir"),
         ("Origin Waypoint ID", "origin_waypoint_id"),
@@ -322,15 +320,15 @@ class RMB(TalkerSentence):
         ("Range to Destination", "dest_range"), # Nautical Miles
         ("True Bearing to Destination", "dest_true_bearing"),
         ("Velocity Towards Destination", "dest_velocity"), # Knots
-        ("Arrival Alarm", "arrival_alarm")
+        ("Arrival Alarm", "arrival_alarm"),
     ) # A = Arrived, V = Not arrived
 
-class RMC(TalkerSentence, LatLonFix, DatetimeFix):
+class RMC(TalkerSentence, ValidStatusFix, LatLonFix, DatetimeFix):
     """ Recommended Minimum Specific GPS/TRANSIT Data
     """
     fields = (
         ("Timestamp", "timestamp", timestamp),
-        ("Data Validity", "data_validity"),
+        ('Status', 'status'), # contains the 'A' or 'V' flag
         ("Latitude", "lat"),
         ("Latitude Direction", "lat_dir"),
         ("Longitude", "lon"),
@@ -339,7 +337,7 @@ class RMC(TalkerSentence, LatLonFix, DatetimeFix):
         ("True Course", "true_course", float),
         ("Datestamp", "datestamp", datestamp),
         ("Magnetic Variation", "mag_variation"),
-        ("Magnetic Variation Direction", "mag_var_dir")
+        ("Magnetic Variation Direction", "mag_var_dir"),
     )
 
 class RTE(TalkerSentence):
@@ -395,7 +393,7 @@ class TRF(TalkerSentence):
         ("Number of Iterations", "num_iterations"),
         ("Number of Doppler Intervals", "num_doppler_intervals"),
         ("Update Distance", "update_dist"), # Nautical Miles
-        ("Satellite ID", "sat_id")
+        ("Satellite ID", "sat_id"),
     )
 
 
@@ -406,11 +404,11 @@ class TXT(TalkerSentence):
         ("Number of Messages", "num_msg"),
         ("Message Number", "msg_num"),
         ("Type of Message", "msg_type"),
-        ("Text", "text")
+        ("Text", "text"),
     )
 
 
-class VBW(TalkerSentence):
+class VBW(TalkerSentence, ValidVBWFix):
     """ Dual Ground/Water Speed
     """
     fields = (
@@ -419,7 +417,7 @@ class VBW(TalkerSentence):
         ("Water Speed Data Validity", "data_validity_water_spd"),
         ("Longitudinal Ground Speed", "lon_grnd_spd", Decimal), # Knots
         ("Transverse Ground Speed", "trans_grnd_spd", Decimal), # Knots
-        ("Ground Speed Data Validity", "data_validity_grnd_spd")
+        ("Ground Speed Data Validity", "data_validity_grnd_spd"),
     )
 
 class VTG(TalkerSentence):
@@ -435,7 +433,7 @@ class VTG(TalkerSentence):
         ("Speed over ground symbol", "spd_over_grnd_kts_sym"),
         ("Speed over ground kmph", "spd_over_grnd_kmph", float),
         ("Speed over ground kmph symbol", "spd_over_grnd_kmph_sym"),
-        ("FAA mode indicator", "faa_mode")
+        ("FAA mode indicator", "faa_mode"),
     )
 
 
@@ -445,7 +443,7 @@ class WCV(TalkerSentence):
     fields = (
         ("Velocity", "velocity"),
         ("Velocity Units", "vel_units"), # Knots
-        ("Waypoint ID", "waypoint_id")
+        ("Waypoint ID", "waypoint_id"),
     )
 
 
@@ -458,7 +456,7 @@ class WNC(TalkerSentence):
         ("Distance, Kilometers", "dist_km"),
         ("Distance, Kilometers Unit", "dist_km_unit"),
         ("Origin Waypoint ID", "waypoint_origin_id"),
-        ("Destination Waypoint ID", "waypoint_dest_id")
+        ("Destination Waypoint ID", "waypoint_dest_id"),
     )
 
 
@@ -470,7 +468,7 @@ class WPL(TalkerSentence):
         ("Latitude Direction", "lat_dir"),
         ("Longitude", "lon"),
         ("Longitude Direction", "lon_dir"),
-        ("Waypoint ID", "waypoint_id")
+        ("Waypoint ID", "waypoint_id"),
     )
 
 
@@ -482,7 +480,7 @@ class XTE(TalkerSentence):
         ("Lock flag (Not Used)", "lock_flag"),
         ("Cross Track Error Distance", "cross_track_err_dist"),
         ("Correction Direction (L or R)", "correction_dir"),
-        ("Distance Units", "dist_units")
+        ("Distance Units", "dist_units"),
     )
 
 
@@ -490,10 +488,10 @@ class ZDA(TalkerSentence):
     fields = (
         ("Timestamp", "timestamp", timestamp), # hhmmss.ss = UTC
         ("Day", "day", int), # 01 to 31
-        ("Month", "month",  int), # 01 to 12
-        ("Year", "year",  int), # Year = YYYY
-        ("Local Zone Description", "local_zone",  int), # 00 to +/- 13 hours
-        ("Local Zone Minutes Description", "local_zone_minutes",  int) # same sign as hours
+        ("Month", "month", int), # 01 to 12
+        ("Year", "year", int), # Year = YYYY
+        ("Local Zone Description", "local_zone", int), # 00 to +/- 13 hours
+        ("Local Zone Minutes Description", "local_zone_minutes", int), # same sign as hours
     )
 
     @property
@@ -517,21 +515,20 @@ class RSA(TalkerSentence):
     """ Rudder Sensor Angle
     """
     fields = (
-        ("Starboard rudder sensor","rsa_starboard", Decimal),
-        ("Starboard rudder sensor status","rsa_starboard_status"),
-        ("Port rudder sensor","rsa_port", Decimal),
-        ("Port rudder sensor status","rsa_port_status"),
+        ("Starboard rudder sensor", "rsa_starboard", Decimal),
+        ("Starboard rudder sensor status", "rsa_starboard_status"),
+        ("Port rudder sensor", "rsa_port", Decimal),
+        ("Port rudder sensor status", "rsa_port_status"),
     )
 
 class HSC(TalkerSentence):
     """ Heading Steering Command
     """
     fields = (
-
-        ("Heading","heading_true", Decimal),
-        ("True","true"),
-        ("Heading Magnetic","heading_magnetic", Decimal),
-        ("Magnetic","magnetic"),
+        ("Heading", "heading_true", Decimal),
+        ("True", "true"),
+        ("Heading Magnetic", "heading_magnetic", Decimal),
+        ("Magnetic", "magnetic"),
 
     )
 class MWD(TalkerSentence):
@@ -539,48 +536,41 @@ class MWD(TalkerSentence):
     NMEA 0183 standard Wind Direction and Speed, with respect to north.
     """
     fields = (
-        ("Wind direction true","direction_true", Decimal),
-        ("True","true"),
-        ("Wind direction magnetic","direction_magnetic", Decimal),
-        ("Magnetic","magnetic"),
-        ("Wind speed knots","wind_speed_knots", Decimal),
-        ("Knots","knots"),
-        ("Wind speed meters/second","wind_speed_meters", Decimal),
-        ("Wind speed","meters"),
+        ("Wind direction true", "direction_true", Decimal),
+        ("True", "true"),
+        ("Wind direction magnetic", "direction_magnetic", Decimal),
+        ("Magnetic", "magnetic"),
+        ("Wind speed knots", "wind_speed_knots", Decimal),
+        ("Knots", "knots"),
+        ("Wind speed meters/second", "wind_speed_meters", Decimal),
+        ("Wind speed", "meters"),
     )
 
-class MWV(TalkerSentence):
+class MWV(TalkerSentence, ValidStatusFix):
     """ Wind Speed and Angle
     NMEA 0183 standard Wind Speed and Angle, in relation to the vessel's
     bow/centerline.
     """
     fields = (
-        ("Wind angle","wind_angle", Decimal), # in relation to vessel's centerline
-        ("Reference","reference"), # relative (R)/true(T)
-        ("Wind speed","wind_speed", Decimal),
-        ("Wind speed units","wind_speed_units"), # K/M/N
-        ("Status","status"),
+        ("Wind angle", "wind_angle", Decimal), # in relation to vessel's centerline
+        ("Reference", "reference"), # relative (R)/true(T)
+        ("Wind speed", "wind_speed", Decimal),
+        ("Wind speed units", "wind_speed_units"), # K/M/N
+        ("Status", "status"),
     )
 
+# DBT - Depth below trasducer, depth referenced to the transducer
+# Used by simrad devices (f.e. EK500)
 class DBT(TalkerSentence):
     """ Depth Below Transducer
     """
     fields = (
-        ("Depth feet","depth_feet", Decimal),
-        ("Feet","feet"),
-        ("Depth meters","depth_meters", Decimal),
-        ("Meters","meters"),
-        ("Depth fathoms","depth_fathoms", Decimal),
-        ("fathoms","fathoms"),
-    )
-
-class DPT(TalkerSentence):
-    """ Depth of Water
-    """
-    fields = (
-        ("Depth meters","depth", Decimal),
-        ("Offset from transducer","offset", Decimal),
-        ("Maximum range on scale","max_range", Decimal)
+        ("Depth below surface, feet", "depth_feet", Decimal),
+        ("Feet", "unit_feet"),
+        ("Depth below surface, meters", "depth_meters", Decimal),
+        ("Meters", "unit_meters"),
+        ("Depth below surface, fathoms", "depth_fathoms", Decimal),
+        ("fathoms", "unit_fathoms"),
     )
 
 class HDM(TalkerSentence):
@@ -588,46 +578,183 @@ class HDM(TalkerSentence):
     Heading, Magnetic
     """
     fields = (
-        ("Heading degrees","heading", Decimal),
-        ("Magnetic","magnetic"),
+        ("Heading degrees", "heading", Decimal),
+        ("Magnetic", "magnetic"),
     )
 
 class MTW(TalkerSentence):
     """ Water Temperature
     """
     fields = (
-        ('Water temperature','temperature', Decimal),
-        ('Unit of measurement','units')
+        ('Water temperature', 'temperature', Decimal),
+        ('Unit of measurement', 'units'),
     )
 
 class VHW(TalkerSentence):
     """ Water Speed and Heading
     """
     fields = (
-        ('Heading true degrees','heading_true', Decimal),
-        ('heading true','true'),
-        ('Heading Magnetic degrees','heading_magnetic', Decimal),
-        ('Magnetic','magnetic'),
-        ('Water speed knots','water_speed_knots', Decimal),
-        ('Knots','knots'),
-        ('Water speed kilometers','water_speed_km', Decimal),
-        ('Kilometers','kilometers'),
+        ('Heading true degrees', 'heading_true', Decimal),
+        ('heading true', 'true'),
+        ('Heading Magnetic degrees', 'heading_magnetic', Decimal),
+        ('Magnetic', 'magnetic'),
+        ('Water speed knots', 'water_speed_knots', Decimal),
+        ('Knots', 'knots'),
+        ('Water speed kilometers', 'water_speed_km', Decimal),
+        ('Kilometers', 'kilometers'),
     )
 
 class VLW(TalkerSentence):
     """ Distance Traveled through the Water
     """
     fields = (
-
-        ('Water trip distance','trip_distance', Decimal),
-        ('Trip distance nautical miles','trip_distance_miles'),
-        ('Water trip distance since reset','trip_distance_reset', Decimal),
-        ('Trip distance nautical miles since reset','trip_distance_reset_miles'),
-
+        ('Water trip distance', 'trip_distance', Decimal),
+        ('Trip distance nautical miles', 'trip_distance_miles'),
+        ('Water trip distance since reset', 'trip_distance_reset', Decimal),
+        ('Trip distance nautical miles since reset', 'trip_distance_reset_miles'),
     )
-# ---------------------------------- Not Yet Implemented --------------------- #
+# --------------------- Implemented by Joachim Bakke (joabakk)---------------- #
 # ---------------------------------------------------------------------------- #
 
+class ROT(TalkerSentence, ValidStatusFix):
+    """ Rate of Turn
+    """
+    fields = (
+        ("Rate of turn", "rate_of_turn"), #- indicates bow turn to port
+        ('Status', 'status'), # contains the 'A' or 'B' flag
+    )
+
+class RPM(TalkerSentence, ValidStatusFix):
+    """ Revolutions
+    """
+#        1 2 3   4   5 6
+#        | | |   |   | |
+# $--RPM,a,x,x.x,x.x,A*hh<CR><LF>
+
+# Field Number:
+#  1) Sourse, S = Shaft, E = Engine
+#  2) Engine or shaft number
+#  3) Speed, Revolutions per minute
+#  4) Propeller pitch, % of maximum, "-" means astern
+#  5) Status, A means data is valid
+#  6) Checksum
+
+    fields = (
+        ("Source", "source"), #S = Shaft, E = Engine
+        ("Engine or shaft number", "engine_no", int),
+        ("Speed", "speed", float), #RPM
+        ("Propeller pitch", "pitch"), #- means astern
+        ("Status", "status"), #A means valid
+    )
+
+
+class VPW(TalkerSentence):
+    """ Speed, Measured Parallel to Wind
+    """
+    fields = (
+        ("Speed knots", "speed_kn", float),#- means downwind
+        ("Unit knots", "unit_knots"),#N means knots
+        ("Speed m/s", "speed_ms", float),
+        ("Unit m/s", "unit_ms"),#M means m/s
+    )
+
+# VPW - Speed - Measured Parallel to Wind
+
+#       1   2 3   4 5
+#       |   | |   | |
+#$--VPW,x.x,N,x.x,M*hh<CR><LF>
+
+# Field Number:
+#  1) Speed, "-" means downwind
+#  2) N = Knots
+#  3) Speed, "-" means downwind
+#  4) M = Meters per second
+#  5) Checksum
+
+class VDR(TalkerSentence):
+    fields = (
+        ("Degrees True", "deg_t", float),
+        ("TRUE", "true"),#T means true
+        ("Degrees Magnetic", "deg_m", float),
+        ("Magnetic", "magnetic"),#M means magnetic
+        ("Speed of Current", "current", float),
+        ("Unit", "unit_kn"), #N means knots
+    )
+
+# VDR - Set and Drift
+
+#        1   2 3   4 5   6 7
+#        |   | |   | |   | |
+# $--VDR,x.x,T,x.x,M,x.x,N*hh<CR><LF>
+
+# Field Number:
+#  1) Degress True
+#  2) T = True
+#  3) Degrees Magnetic
+#  4) M = Magnetic
+#  5) Knots (speed of current)
+#  6) N = Knots
+#  7) Checksum
+
+class VWR(TalkerSentence):
+    fields = (
+        ("Degrees Rel", "deg_r", float),
+        ("Left/Right", "l_r"),#R means right
+        ("Wind speed kn", "wind_speed_kn", float),
+        ("Knots", "unit_knots"),#N means knots
+        ("Wind Speed m/s", "wind_speed_ms", float),
+        ("m/s", "unit_ms"),#M means m/s
+        ("Wind Speed Km/h", "wind_speed_km", float),
+        ("Knots", "unit_km"), #K means Km
+    )
+
+    # TODO
+    # getters/setters that normalize units,
+    # apply L/R sign, and sync all fields
+    # when setting the speed
+
+#VWR - Relative Wind Speed and Angle
+
+#         1  2  3  4  5  6  7  8 9
+#         |  |  |  |  |  |  |  | |
+# $--VWR,x.x,a,x.x,N,x.x,M,x.x,K*hh<CR><LF>
+
+# Field Number:
+#  1) Wind direction magnitude in degrees
+#  2) Wind direction Left/Right of bow
+#  3) Speed
+#  4) N = Knots
+#  5) Speed
+#  6) M = Meters Per Second
+#  7) Speed
+#  8) K = Kilometers Per Hour
+#  9) Checksum
+
+
+Transducer = namedtuple("Transducer", [
+    "type",
+    "value",
+    "units",
+    "id",
+])
+
+class XDR(TalkerSentence):
+    fields = (
+        ("Transducer type", "type"),
+        ("Transducer data value", "value"),
+        ("Transducer data units", "units"),
+        ("Transducer ID", "id"),
+    )
+
+    @property
+    def num_transducers(self):
+        return len(self.data) // 4
+
+    def get_transducer(self, i):
+        return Transducer(*self.data[i*4:i*4+4])
+
+# ---------------------------------- Not Yet Implemented --------------------- #
+# ---------------------------------------------------------------------------- #
 
 
 #class FSI(TalkerSentence):
@@ -635,45 +762,39 @@ class VLW(TalkerSentence):
 #    """
     #    fields = (
     # )
+
 #class GLC(TalkerSentence):
 #    """ Geographic Position, Loran-C
 #    """
     #    fields = (
     # )
+
 #class GXA(TalkerSentence):
 #    """ TRANSIT Position
 #    """
     #    fields = (
     # )
+
 #class LCD(TalkerSentence):
 #    """ Loran-C Signal Data
 #    """
     #    fields = (
     # )
+
 #class MTA(TalkerSentence):
 #    """ Air Temperature (to be phased out)
 #    """
     #    fields = (
     # )
 
-
 #class OLN(TalkerSentence):
 #    """ Omega Lane Numbers
 #    """
     #    fields = (
     # )
+
 #class OSD(TalkerSentence):
 #    """ Own Ship Data
-#    """
-    #    fields = (
-    # )
-#class ROT(TalkerSentence):
-#    """ Rate of Turn
-#    """
-    #    fields = (
-    # )
-#class RPM(TalkerSentence):
-#    """ Revolutions
 #    """
     #    fields = (
     # )
@@ -683,42 +804,31 @@ class VLW(TalkerSentence):
 #    """
     #    fields = (
     # )
+
 #class SFI(TalkerSentence):
 #    """ Scanning Frequency Information
 #    """
     #    fields = (
     # )
+
 #class TTM(TalkerSentence):
 #    """ Tracked Target Message
 #    """
     #    fields = (
     # )
-#class VDR(TalkerSentence):
-#    """ Set and Drift
-#    """
-    #    fields = (
-    # )
 
-#class VPW(TalkerSentence):
-#    """ Speed, Measured Parallel to Wind
-#    """
-    #    fields = (
-    # )
-#class XDR(TalkerSentence):
-#    """ Transducer Measurements
-#    """
-    #    fields = (
-    # )
 #class XTR(TalkerSentence):
 #    """ Cross-Track Error, Dead Reckoning
 #    """
     #    fields = (
     # )
+
 #class ZFO(TalkerSentence):
 #    """ UTC & Time from Origin Waypoint
 #    """
     #    fields = (
     # )
+
 #class ZTG(TalkerSentence):
 #    """ UTC & Time to Destination Waypoint
 #    """
@@ -734,6 +844,7 @@ class VLW(TalkerSentence):
 #    """
     #    fields = (
     # )
+
 # ---------------------------------------------------------------------------- #
 # -------------------------- Obsolete Formats -------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -745,3 +856,89 @@ class VLW(TalkerSentence):
     # )
 
 
+# ------------- Implemented by Rocco De Marco (CNR/ISMAR ITALY) -------------- #
+# ---------------------------------------------------------------------------- #
+
+
+# DTM - NMEA 0183 standard Datum Reference
+class DTM(TalkerSentence):
+    fields = (
+        ('Local datum', 'datum'),
+        ('Subdivision datum', 'subd_datum'),
+        ('Latitude', 'lat'),
+        ('Latitude Direction', 'lat_dir'),
+        ('Longitude', 'lon'),
+        ('Longitude Direction', 'lon_dir'),
+        ('Signed altitude', 'altitude'),
+        ('Datum code', 'datum_code'),
+    )
+# Examples: $GPDTM,W84,,0.0,N,0.0,E,0.0,W84*6F
+#           $GPDTM,999,CH95,0.08,N,0.07,E,-47.7,W84*1C
+
+
+# MDA - NMEA 0183 standard Meteorological Composite
+# Used by Airmar PB 150 weather station
+class MDA(TalkerSentence):
+    # Example:
+    # $WIMDA,30.2269,I,1.0236,B,17.7,C,,,43.3,,5.0,C,131.5,T,128.6,M,0.8,N,0.4,M*54
+    fields = (
+        ('Barometric pressure, inches of mercury', 'b_pressure_inch', Decimal),
+        ('Inches', 'inches'), # I = Inches
+        ('Barometric pressure, bars', 'b_pressure_bar', Decimal),
+        ('Bars', 'bars'), # B = bars
+        ('Air temperature, degrees C', 'air_temp', Decimal),
+        ('Celsius', 'a_celsius'),    # C = Celsius
+        ('Water temperature, degrees C', 'water_temp', Decimal),
+        ('Celsius', 'w_celsius'),    # C = Celsius
+        ('Relative humidity, percent', 'rel_humidity', Decimal),
+        ('Absolute humidity, percent', 'abs_humidity', Decimal),
+        ('Dew point, degrees C', 'dew_point', Decimal),
+        ('Celsius', 'd_celsius'),    # C = Celsius
+        ('Wind direction true', 'direction_true', Decimal),
+        ('True', 'true'), # T = True
+        ('Wind direction magnetic', 'direction_magnetic', Decimal),
+        ('Magnetic', 'magnetic'), # M = Magnetic
+        ('Wind speed knots', 'wind_speed_knots', Decimal),
+        ('Knots', 'knots'), # N = Knots
+        ('Wind speed meters/second', 'wind_speed_meters', Decimal),
+        ('Meters', 'meters'), # M = Meters/second
+    )
+
+
+# VWT - NMEA 0183 True wind angle in relation to the vessel's heading, and true wind
+# speed referenced to the water.
+class VWT(TalkerSentence):
+    fields = (
+        ('Wind angle relative to the vessel', 'wind_angle_vessel', Decimal),
+        ('Direction, L=Left, R=Right, relative to the vessel head', 'direction'),
+        ('Wind speed knots', 'wind_speed_knots', Decimal),
+        ('Knots', 'knots'), # N = Knots
+        ('Wind speed meters/second', 'wind_speed_meters', Decimal),
+        ('Meters', 'meters'), # M = Meters/second
+        ('Wind speed km/h', 'wind_speed_km', Decimal),
+        ('Km', 'km'), # K = km/h
+    )
+
+
+# DBS - Depth below surface
+# Used by simrad devices (f.e. EK500)
+# Deprecated and replaced by DPT
+class DBS(TalkerSentence):
+    fields = (
+        ('Depth below surface, feet', 'depth_feet', Decimal),
+        ('Feets', 'feets'),
+        ('Depth below surface, meters', 'depth_meter', Decimal),
+        ('Meters', 'meters'),
+        ('Depth below surface, fathoms', 'depth_ fathoms', Decimal),
+        ('Fathoms', 'fathoms'),
+    )
+
+# DPT - water depth relative to the transducer and offset of the measuring
+# transducer
+# Used by simrad devices (f.e. EK500)
+class DPT(TalkerSentence):
+    fields = (
+        ('Water depth, in meters', 'depth', Decimal),
+        ('Offset from the trasducer, in meters', 'offset', Decimal),
+        ('Maximum range scale in use', 'range', Decimal),
+    )

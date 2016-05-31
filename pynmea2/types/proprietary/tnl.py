@@ -1,5 +1,6 @@
-
 # -- TRIMBLE -- #
+
+# pylint: disable=wildcard-import,unused-wildcard-import
 from ... import nmea
 from ...nmea_utils import *
 """ Support for proprietary messages from BD9xx recievers.
@@ -17,7 +18,7 @@ class TNL(nmea.ProprietarySentence):
         '''
         sentence_type = data[0] or data[1]
         name = manufacturer + sentence_type
-        cls = _cls.sentence_types.get(name,_cls)
+        cls = _cls.sentence_types.get(name, _cls)
         return super(TNL, cls).__new__(cls)
 
     def __init__(self, manufacturer, data):
@@ -32,17 +33,17 @@ class TNLAVR(TNL):
     fields = (
         ('Empty', '_'),
         ('Sentence Type', 'type'),
-        ('Timestamp','timestamp', timestamp),
-        ('Yaw Angle','yaw_angle'),
-        ('Yaw','yaw'),
-        ('Tilt Angle','tilt_angle'),
-        ('Tilt','tilt'),
-        ('Roll Angle','roll_angle'),
-        ('Roll','roll'),
+        ('Timestamp', 'timestamp', timestamp),
+        ('Yaw Angle', 'yaw_angle'),
+        ('Yaw', 'yaw'),
+        ('Tilt Angle', 'tilt_angle'),
+        ('Tilt', 'tilt'),
+        ('Roll Angle', 'roll_angle'),
+        ('Roll', 'roll'),
         ('Baseline Range', 'baseline'),
         ('GPS Quality', 'gps_quality'),
-        ('PDOP','pdop'),
-        ('Total number of satelites in use', 'num_sats')
+        ('PDOP', 'pdop'),
+        ('Total number of satelites in use', 'num_sats'),
     )
 
 
@@ -53,16 +54,16 @@ class TNLBPQ(TNL, LatLonFix, DatetimeFix):
     fields = (
         ('Empty', '_'),
         ('Sentence Type', 'type'),
-        ('Timestamp','timestamp', timestamp),
+        ('Timestamp', 'timestamp', timestamp),
         ("Datestamp", "datestamp", datestamp),
         ("Latitude", "lat"),
         ("Latitude Direction", "lat_dir"),
         ("Longitude", "lon"),
         ("Longitude Direction", "lon_dir"),
-        ('Height Ellipsoid','height'),
+        ('Height Ellipsoid', 'height'),
         ('Meters', 'meters'),
         ('Mode fix type', 'mode_fix_type'),
-        ('Total number of satelites in use', 'num_sats')
+        ('Total number of satelites in use', 'num_sats'),
     )
 
 
@@ -73,7 +74,7 @@ class TNLGGK(TNL, LatLonFix, DatetimeFix):
     fields = (
         ('Empty', '_'),
         ('Sentence Type', 'type'),
-        ('Timestamp','timestamp', timestamp),
+        ('Timestamp', 'timestamp', timestamp),
         ("Datestamp", "datestamp", datestamp),
         ("Latitude", "lat"),
         ("Latitude Direction", "lat_dir"),
@@ -81,10 +82,10 @@ class TNLGGK(TNL, LatLonFix, DatetimeFix):
         ("Longitude Direction", "lon_dir"),
         ('GPS Quality', 'quality'),
         ('Total number of satelites in use', 'num_sats'),
-        ('DOP','dop'),
-        ('Height Ellipsoid','height'),
+        ('DOP', 'dop'),
+        ('Height Ellipsoid', 'height'),
         ('Meters', 'meters'),
-        ('Mode fix type', 'mode_fix_type')
+        ('Mode fix type', 'mode_fix_type'),
     )
 
 
@@ -95,18 +96,18 @@ class TNLVHD(TNL, DatetimeFix):
     fields = (
         ('Empty', '_'),
         ('Sentence Type', 'type'),
-        ('Timestamp','timestamp', timestamp),
+        ('Timestamp', 'timestamp', timestamp),
         ("Datestamp", "datestamp", datestamp),
-        ('Azimuth Angle','azimuth'),
-        ('AzimuthTime','azdt'),
-        ('Vertical Angle','vertical'),
-        ('VerticalTime','vertdt'),
-        ('Range','range'),
-        ('RangeTime','rdt'),
+        ('Azimuth Angle', 'azimuth'),
+        ('AzimuthTime', 'azdt'),
+        ('Vertical Angle', 'vertical'),
+        ('VerticalTime', 'vertdt'),
+        ('Range', 'range'),
+        ('RangeTime', 'rdt'),
         ('GPS Quality', 'gps_quality'),
         ('Total number of satelites in use', 'num_sats'),
-        ('PDOP','pdop')
-      )
+        ('PDOP', 'pdop'),
+    )
 
 
 class TNLPJT(TNL):
@@ -118,4 +119,4 @@ class TNLPJT(TNL):
         ('Sentence Type', 'type'),
         ('Coordinate System', 'coord_name'),
         ('Project Name', 'project_name'),
-      )
+    )
